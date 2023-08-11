@@ -1,4 +1,4 @@
-package com.ysy.myapp_backend;
+package com.ysy.myapp;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

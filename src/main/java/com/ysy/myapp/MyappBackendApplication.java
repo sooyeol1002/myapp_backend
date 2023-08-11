@@ -1,4 +1,4 @@
-package com.ysy.myapp_backend;
+package com.ysy.myapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
