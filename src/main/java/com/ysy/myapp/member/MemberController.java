@@ -1,4 +1,4 @@
-package com.ysy.myapp.backend.member;
+package com.ysy.myapp.member;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,7 @@ public class MemberController {
     @Autowired
     MemberRepository repo;
 
-    // 회원가입단
+    // 회원가입
     @PostMapping
     public ResponseEntity<Map<String, Object>> addMember(@RequestBody Member member) {
         if(member.getName() == null || member.getName().isEmpty()) {
@@ -44,7 +44,7 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-    // 회원탈퇴단
+    // 회원탈퇴
     @DeleteMapping(value = "/{name}")
     public ResponseEntity deleteMember(@PathVariable String name){
         if (!repo.findByName(name).isPresent()) {
@@ -54,14 +54,14 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    // 조회단
+    // 조회
     @GetMapping
     public List<Member> findMemberList() {
         List<Member> list = repo.findAllByOrderByName();
         return list;
     }
 
-    // 패스워드 검증단
+    // 패스워드 검증
 //    public void validatePassword() {
 //
 //    } 해야함

@@ -1,4 +1,4 @@
-package com.ysy.myapp.backend.financial;
+package com.ysy.myapp.financial;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,4 +1,4 @@
-package com.ysy.myapp.backend.member;
+package com.ysy.myapp.member;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
