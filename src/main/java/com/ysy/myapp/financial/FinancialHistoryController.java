@@ -51,32 +51,26 @@ public class FinancialHistoryController {
     // 날짜값으로 데이터를 조회
     @GetMapping("/by-date/{date}")
     public ResponseEntity<List<FinancialHistory>> getFinancialHistoryByDate(@PathVariable String date) {
-        List<FinancialHistory> filteredList =
-                financialHistoryList
-                        .stream()
-                        .filter(history -> history.getDate().equals(Long.parseLong(date)))
-                        .collect(Collectors.toList());
-
+        List<FinancialHistory> filteredList = repo.findByDate(date);
         return ResponseEntity.ok(filteredList);
-
     }
 
     // 잔액계산
-//    @PostMapping("/financialHistories/calculate-balance")
-//    public ResponseEntity<Map<String, Long>> calculateBalance(@RequestBody Map<String, Long> data) {
-//        Long deposit = data.get("deposit");
-//        Long withdraw = data.get("withdraw");
-//        if (deposit == null || withdraw == null) {
-//            Map<String, Long> res = new HashMap<>();
-//            res.put("balance", 0L);
-//
-//            return ResponseEntity.badRequest().body(res);
-//        }
-//
-//        Long balance = deposit - withdraw;
-//        Map<String, Long> res = new HashMap<>();
-//        res.put("balance", balance);
-//
-//        return ResponseEntity.ok(res);
-//    }
+    @PostMapping("calculate-balance")
+    public ResponseEntity<Map<String, Long>> calculateBalance(@RequestBody Map<String, Long> data) {
+        Long deposit = data.get("deposit");
+        Long withdraw = data.get("withdraw");
+        if (deposit == null || withdraw == null) {
+            Map<String, Long> res = new HashMap<>();
+            res.put("balance", 0L);
+
+            return ResponseEntity.badRequest().body(res);
+        }
+
+        Long balance = deposit - withdraw;
+        Map<String, Long> res = new HashMap<>();
+        res.put("balance", balance);
+
+        return ResponseEntity.ok(res);
+    }
 }
