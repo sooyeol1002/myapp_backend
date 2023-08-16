@@ -19,7 +19,7 @@ public class Member {
 
     @Column(nullable = false)
     private String password;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String inputPassword;
     @Column(nullable = false)
     private long phone;
