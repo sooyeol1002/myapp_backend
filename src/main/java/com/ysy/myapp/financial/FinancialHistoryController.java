@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/financialHistories")
 public class FinancialHistoryController {
     private List<FinancialHistory> financialHistoryList;
+    private Map<String, Long> balanceData = new HashMap<>();
 
     @Autowired
     FinancialHistoryRepository repo;
@@ -72,5 +73,14 @@ public class FinancialHistoryController {
         res.put("balance", balance);
 
         return ResponseEntity.ok(res);
+    }
+
+    // 월별 DB 저장값 조회
+    // 2023-05 이런형식으로 조회해야 조회가 됨.
+    @GetMapping("/by-month/{month}")
+    public ResponseEntity<List<FinancialHistory>> getBalanceByMonth(@PathVariable String month) {
+        // System.out.println("Requested month: " + month);
+        List<FinancialHistory> financialHistories = repo.findByDate(month);
+        return ResponseEntity.ok(financialHistories);
     }
 }

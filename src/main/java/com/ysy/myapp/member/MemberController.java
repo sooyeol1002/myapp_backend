@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/members")
@@ -62,7 +63,24 @@ public class MemberController {
     }
 
     // 패스워드 검증
-//    public void validatePassword() {
-//
-//    } 해야함
+    @PostMapping("/validate-password")
+    public String validatePassword(@RequestBody Member member) {
+        PasswordValidator validator = new PasswordValidator();
+        Optional<Member> optionalMember = repo.findByName(member.getName());
+
+        if (optionalMember.isPresent()) {
+            Member savedMember = optionalMember.get();
+            boolean valid = validator.validatePassword(
+                    savedMember.getPassword(),
+                    member.getInputPassword());
+
+            if (valid) {
+                return "패스워드가 일치합니다";
+            } else {
+                return "패스워드가 일치하지 않습니다.";
+            }
+        } else {
+            return "회원을 찾을 수 없습니다.";
+        }
+    }
 }

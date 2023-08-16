@@ -20,6 +20,8 @@ public class Member {
     @Column(nullable = false)
     private String password;
     @Column(nullable = false)
+    private String inputPassword;
+    @Column(nullable = false)
     private long phone;
     @Column(nullable = false)
     private String email;
