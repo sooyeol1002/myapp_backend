@@ -1,6 +1,5 @@
-package com.ysy.myapp.financial;
+package com.ysy.myapp.auth.entity;
 
-import com.ysy.myapp.member.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,15 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class
-FinancialHistory {
+@AllArgsConstructor
+@Builder
+@Entity(name = "AuthFinancialHistory")
+public class FinancialHistory {
     @Id
     private String date;
-
     @Column(nullable = false)
     private long deposit;
     @Column(nullable = false)
@@ -24,7 +21,10 @@ FinancialHistory {
     @Column(nullable = false)
     private long balance;
 
-    @ManyToOne
-    @JoinColumn(name = "member_name")
+    @OneToOne
     private Member member;
+
+    public long getId() {
+        return 0;
+    }
 }
