@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/financialHistories")
 public class FinancialHistoryController {
     private List<FinancialHistory> financialHistoryList;
-    private Map<String, Long> balanceData = new HashMap<>();
+    private Map<FinancialHistory, Long> balanceData = new HashMap<>();
 
     @Autowired
     FinancialHistoryRepository repo;
@@ -43,7 +43,6 @@ public class FinancialHistoryController {
             Map<String, Object> res = new HashMap<>();
             res.put("data", savedFinancialHistory);
             res.put("message", "created");
-
             return ResponseEntity.status(HttpStatus.CREATED).body(res);
         }
         return ResponseEntity.ok().build();
