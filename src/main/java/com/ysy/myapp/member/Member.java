@@ -25,4 +25,7 @@ public class Member {
     private long phone;
     @Column(nullable = false)
     private String email;
+
+    public Member(String name, String password, long phone, String email) {
+    }
 }

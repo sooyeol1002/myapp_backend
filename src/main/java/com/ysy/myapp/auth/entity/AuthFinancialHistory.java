@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity(name = "AuthFinancialHistory")
-public class FinancialHistory {
+public class AuthFinancialHistory {
     @Id
     private String date;
     @Column(nullable = false)
@@ -22,7 +22,7 @@ public class FinancialHistory {
     private long balance;
 
     @OneToOne
-    private Member member;
+    private AuthMember member;
 
     public long getId() {
         return 0;

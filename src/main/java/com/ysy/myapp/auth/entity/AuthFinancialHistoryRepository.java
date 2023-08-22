@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface AuthFinancialHistoryRepository extends JpaRepository<FinancialHistory, String> {
-    Optional<FinancialHistory> findByMember_Id(Long id);
+public interface AuthFinancialHistoryRepository extends JpaRepository<AuthFinancialHistory, String> {
+    Optional<AuthFinancialHistory> findByMember_Id(Long id);
 }

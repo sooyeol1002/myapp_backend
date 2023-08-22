@@ -1,5 +1,8 @@
 package com.ysy.myapp.auth.request;
 
+import com.ysy.myapp.auth.entity.AuthMember;
+import com.ysy.myapp.member.Member;
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,4 +29,5 @@ public class SignupRequest {
     public long getBalance() {
         return 0;
     }
+
 }

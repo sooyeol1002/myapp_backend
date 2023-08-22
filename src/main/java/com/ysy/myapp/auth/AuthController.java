@@ -1,8 +1,8 @@
 package com.ysy.myapp.auth;
 
-import com.ysy.myapp.auth.entity.FinancialHistory;
+import com.ysy.myapp.auth.entity.AuthFinancialHistory;
 import com.ysy.myapp.auth.entity.AuthFinancialHistoryRepository;
-import com.ysy.myapp.auth.entity.Member;
+import com.ysy.myapp.auth.entity.AuthMember;
 import com.ysy.myapp.auth.entity.AuthMemberRepository;
 import com.ysy.myapp.auth.request.SignupRequest;
 import com.ysy.myapp.auth.util.HashUtil;
@@ -78,13 +78,14 @@ public class AuthController {
         System.out.println(password);
         // 1. username, pw 인증 확인
         //   1.1 username으로 login테이블에서 조회후 id, secret까지 조회
-        Optional<Member> login = repo.findByName(name);
+        Optional<AuthMember> login = repo.findByName(name);
+        System.out.println(login);
         // username에 매칭이 되는 레코드가 없는 상태
         if(!login.isPresent()) {
             // 401 Unauthorized
             // 클라이언트에서 대충 뭉뜨그려서 [인증정보가 잘못되었습니다.]
             // [사용자이름 또는 패스워드가 잘못되었습니다.]
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FOUND).build();
         }
 
         //   1.2 password+salt -> 해시 -> secret 일치여부 확인
@@ -97,9 +98,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Member l = login.get();
+        AuthMember l = login.get();
         // 2. profile 정보를 조회하여 인증키 생성(JWT)
-        Optional<FinancialHistory> finanHistory = finanHistoryRepo.findByMember_Id(l.getId());
+        Optional<AuthFinancialHistory> finanHistory = finanHistoryRepo.findByMember_Id(l.getId());
         // 로그인정보와 프로필 정보가 제대로 연결 안됨.
         if(!finanHistory.isPresent()) {
             // 409 conflict: 데이터 현재 상태가 안 맞음

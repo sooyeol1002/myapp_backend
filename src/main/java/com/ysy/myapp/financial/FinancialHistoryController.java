@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,9 +19,6 @@ public class FinancialHistoryController {
     @Autowired
     FinancialHistoryRepository repo;
 
-    @Autowired
-    MemberRepository memberRepo;
-
     @GetMapping
     public List<FinancialHistory> view(){
         List<FinancialHistory> list = repo.findAllByOrderByDate();
@@ -32,7 +28,7 @@ public class FinancialHistoryController {
     // 기록추가
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addFinancialHistory(
-            @RequestBody FinancialHistory financialHistory, Principal principal) {
+            @RequestBody FinancialHistory financialHistory) {
         if (financialHistory.getDate() == null || financialHistory.getDate().isEmpty()) {
             Map<String, Object> res = new HashMap<>();
             res.put("data", null);
@@ -41,22 +37,6 @@ public class FinancialHistoryController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(res);
         }
-
-        // 로그인한 사용자의 이름 가져오기
-        String loggedInUserName = principal.getName();
-
-        // 로그인한 사용자의 정보 조회
-        Optional<Member> loggedUserInfo = memberRepo.findByName(loggedInUserName);
-        if(!loggedUserInfo.isPresent()) {
-            Map<String, Object> res = new HashMap<>();
-            res.put("data", null);
-            res.put("message", "Logged in user not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(res);
-        }
-
-        Member loggedInUser = loggedUserInfo.get();
-        financialHistory.setMember(loggedInUser);
-
         FinancialHistory savedFinancialHistory = repo.save(financialHistory);
         if (savedFinancialHistory != null) {
             Map<String, Object> res = new HashMap<>();
