@@ -109,9 +109,7 @@ public class AuthController {
         }
 
         String token = jwt.createToken(
-                l.getId(), l.getName(),
-                finanHistory.get().getDate());
-        System.out.println(token);
+                l.getId(), l.getName());
 
         // 3. cookie와 헤더를 생성한후 리다이렉트
         Cookie cookie = new Cookie("token", token);

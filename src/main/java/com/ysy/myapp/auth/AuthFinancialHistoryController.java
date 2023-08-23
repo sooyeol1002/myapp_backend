@@ -2,6 +2,9 @@ package com.ysy.myapp.auth;
 
 import com.ysy.myapp.auth.entity.AuthFinancialHistory;
 import com.ysy.myapp.auth.entity.AuthFinancialHistoryRepository;
+import com.ysy.myapp.auth.entity.AuthMember;
+import com.ysy.myapp.auth.entity.AuthMemberRepository;
+import com.ysy.myapp.auth.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +13,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/financialHistories")
 public class AuthFinancialHistoryController {
     private List<AuthFinancialHistory> financialHistoryList;
     private Map<AuthFinancialHistory, Long> balanceData = new HashMap<>();
+    @Autowired
+    private JwtUtil jwtUtil;
+    @Autowired
+    private AuthMemberRepository authMemberRepo;
 
     @Autowired
     AuthFinancialHistoryRepository repo;
@@ -27,9 +35,11 @@ public class AuthFinancialHistoryController {
     }
 
     // 기록추가
+    @Auth
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addFinancialHistory(
             @RequestBody AuthFinancialHistory financialHistory) {
+
         if (financialHistory.getDate() == null || financialHistory.getDate().isEmpty()) {
             Map<String, Object> res = new HashMap<>();
             res.put("data", null);
@@ -38,6 +48,7 @@ public class AuthFinancialHistoryController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(res);
         }
+
         AuthFinancialHistory savedFinancialHistory = repo.save(financialHistory);
         if (savedFinancialHistory != null) {
             Map<String, Object> res = new HashMap<>();

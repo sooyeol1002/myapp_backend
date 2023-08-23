@@ -22,6 +22,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             throws Exception {
         // 1. 요청을 처리할 컨트롤 메서드에 @Auth 어노테이션이 있는지 확인
         // HTTP요청을 처리하는 메서드인지 확인
+
         if(handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
@@ -46,18 +47,18 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return false;
             }
 
+
             // 인증 토큰이 있으면
             // 3. 인증토큰 검증 및 페이로드(subject/claim) 객체화하기
             // 메시지 개념에서 서로 주고받는 데이터를 페이로드(payload)
             AuthMember member =
-                    jwt.validateToken(token.replace("Bearer ", ""));
+                    jwt.validateToken(token);
             if(member == null) {
                 // 401: Unauthorized
                 // 인증토큰이 잘못 됨(시그니처, 페이로드, 알고리즘..)
                 response.setStatus(401);
                 return false;
             }
-
             // 4. 요청 속성(attribute)에 프로필 객체 추가하기
             request.setAttribute("authMember", member);
             return true;

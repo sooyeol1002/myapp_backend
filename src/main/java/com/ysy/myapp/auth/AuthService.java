@@ -52,9 +52,9 @@ public class AuthService {
         // 4. profile_id를 반환
         return memberId;
     }
-    @Transactional
-    public void signUpAndSave(SignupRequest req) {
-        AuthMember authMember = new AuthMember(req.getName(), req.getPassword(), req.getPhone(), req.getEmail());
-        repo.save(authMember);
-    }
+//    @Transactional
+//    public void signUpAndSave(SignupRequest req) {
+//        AuthMember authMember = new AuthMember(req.getName(), req.getPassword(), req.getPhone(), req.getEmail());
+//        repo.save(authMember);
+//    }
 }
