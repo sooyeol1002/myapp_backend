@@ -6,24 +6,21 @@ import com.ysy.myapp.auth.entity.AuthFinancialHistoryRepository;
 import com.ysy.myapp.auth.entity.AuthMemberRepository;
 import com.ysy.myapp.auth.request.SignupRequest;
 import com.ysy.myapp.auth.util.HashUtil;
-import com.ysy.myapp.member.Member;
-import com.ysy.myapp.member.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
-    private final MemberRepository memberRepo;
     private AuthMemberRepository repo;
     private AuthFinancialHistoryRepository finanHistoryRepo;
 
     @Autowired
     private HashUtil hash;
+    private long financialHistoryId;
 
     @Autowired
-    public AuthService(MemberRepository memberRepo, AuthMemberRepository repo, AuthFinancialHistoryRepository finanHistoryRepo) {
-        this.memberRepo = memberRepo;
+    public AuthService( AuthMemberRepository repo, AuthFinancialHistoryRepository finanHistoryRepo) {
         this.repo = repo;
         this.finanHistoryRepo = finanHistoryRepo;
     }
@@ -46,19 +43,17 @@ public class AuthService {
                         .balance(req.getBalance())
                         .member(savedLogin)
                         .build();
-        long financialHistoryId = finanHistoryRepo.save(toSaveFinancialHistory).getId();
+        long memberId = finanHistoryRepo.save(toSaveFinancialHistory).getMemberId();
 
         // 3. 로그인 정보에는 profile_id값만 저장
         savedLogin.setFinancialHistoryId(financialHistoryId);
         repo.save(savedLogin);
 
         // 4. profile_id를 반환
-        return financialHistoryId;
+        return memberId;
     }
     @Transactional
     public void signUpAndSave(SignupRequest req) {
-        Member member = new Member(req.getName(), req.getPassword(), req.getPhone(), req.getEmail());
-        memberRepo.save(member);
         AuthMember authMember = new AuthMember(req.getName(), req.getPassword(), req.getPhone(), req.getEmail());
         repo.save(authMember);
     }

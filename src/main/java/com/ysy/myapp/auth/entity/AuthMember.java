@@ -17,10 +17,14 @@ public class AuthMember {
     private long id;
     @Column(nullable = false)
     private String name;
-//    @Column(nullable = false)
-//    private String password;
     @Column(length = 500)
     private String secret;
+    @Column(nullable = false)
+    private long deposit;
+    @Column(nullable = false)
+    private long withdraw;
+    @Column(nullable = false)
+    private long balance;
 
     @JoinColumn(name = "financial_history_id") // 외래 키 컬럼 이름
     private long financialHistoryId;

@@ -1,5 +1,6 @@
 package com.ysy.myapp.auth;
 
+import com.ysy.myapp.auth.entity.AuthMember;
 import com.ysy.myapp.auth.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -58,7 +59,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
 
             // 4. 요청 속성(attribute)에 프로필 객체 추가하기
-            request.setAttribute("authProfile", member);
+            request.setAttribute("authMember", member);
             return true;
         }
 

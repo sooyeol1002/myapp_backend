@@ -1,34 +1,35 @@
-package com.ysy.myapp.financial;
+package com.ysy.myapp.auth;
 
-import com.ysy.myapp.member.Member;
-import com.ysy.myapp.member.MemberRepository;
+import com.ysy.myapp.auth.entity.AuthFinancialHistory;
+import com.ysy.myapp.auth.entity.AuthFinancialHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/financialHistories")
-public class FinancialHistoryController {
-    private List<FinancialHistory> financialHistoryList;
-    private Map<FinancialHistory, Long> balanceData = new HashMap<>();
+public class AuthFinancialHistoryController {
+    private List<AuthFinancialHistory> financialHistoryList;
+    private Map<AuthFinancialHistory, Long> balanceData = new HashMap<>();
 
     @Autowired
-    FinancialHistoryRepository repo;
+    AuthFinancialHistoryRepository repo;
 
     @GetMapping
-    public List<FinancialHistory> view(){
-        List<FinancialHistory> list = repo.findAllByOrderByDate();
+    public List<AuthFinancialHistory> view(){
+        List<AuthFinancialHistory> list = repo.findAllByOrderByDate();
         return list;
     }
 
     // 기록추가
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addFinancialHistory(
-            @RequestBody FinancialHistory financialHistory) {
+            @RequestBody AuthFinancialHistory financialHistory) {
         if (financialHistory.getDate() == null || financialHistory.getDate().isEmpty()) {
             Map<String, Object> res = new HashMap<>();
             res.put("data", null);
@@ -37,7 +38,7 @@ public class FinancialHistoryController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(res);
         }
-        FinancialHistory savedFinancialHistory = repo.save(financialHistory);
+        AuthFinancialHistory savedFinancialHistory = repo.save(financialHistory);
         if (savedFinancialHistory != null) {
             Map<String, Object> res = new HashMap<>();
             res.put("data", savedFinancialHistory);
@@ -49,8 +50,8 @@ public class FinancialHistoryController {
 
     // 날짜값으로 데이터를 조회
     @GetMapping("/by-date/{date}")
-    public ResponseEntity<List<FinancialHistory>> getFinancialHistoryByDate(@PathVariable String date) {
-        List<FinancialHistory> filteredList = repo.findByDate(date);
+    public ResponseEntity<List<AuthFinancialHistory>> getFinancialHistoryByDate(@PathVariable String date) {
+        List<AuthFinancialHistory> filteredList = repo.findByDate(date);
         return ResponseEntity.ok(filteredList);
     }
 
@@ -76,9 +77,9 @@ public class FinancialHistoryController {
     // 월별 DB 저장값 조회
     // 2023-05 이런형식으로 조회해야 조회가 됨.
     @GetMapping("/by-month/{month}")
-    public ResponseEntity<List<FinancialHistory>> getBalanceByMonth(@PathVariable String month) {
+    public ResponseEntity<List<AuthFinancialHistory>> getBalanceByMonth(@PathVariable String month) {
         // System.out.println("Requested month: " + month);
-        List<FinancialHistory> financialHistories = repo.findByDate(month);
+        List<AuthFinancialHistory> financialHistories = repo.findByDate(month);
         return ResponseEntity.ok(financialHistories);
     }
 }
