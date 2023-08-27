@@ -1,10 +1,12 @@
 package com.ysy.myapp.auth.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +18,7 @@ public class AuthFinancialHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Column(nullable = true)
-    private String date;
+    private LocalDate date;
     @Column(nullable = false)
     private long deposit;
     @Column(nullable = false)
@@ -24,15 +26,34 @@ public class AuthFinancialHistory {
     @Column(nullable = false)
     private long balance;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "member_id")
+    @JsonIgnore
     private AuthMember member;
 
-    public long getId() {
-        return 0;
+    public AuthMember getMember() {
+        return member;
     }
 
-    public long getMemberId() {
-        return 0;
+    public void setMember(AuthMember member) {
+        this.member = member;
     }
+    @Override
+    public String toString() {
+        return "AuthFinancialHistory{" +
+                "id=" + id +
+                ", date='" + date + '\'' +
+                ", deposit=" + deposit +
+                ", withdraw=" + withdraw +
+                ", balance=" + balance +
+                '}';
+    }
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
 }

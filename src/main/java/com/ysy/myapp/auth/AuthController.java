@@ -48,11 +48,11 @@ public class AuthController {
 
         // 2. Buisness Logic(데이터 처리)
         // profile, login 생성 트랜잭션 처리
-        long profileId = service.createIdentity(req);
+        AuthMember newMember = service.createIdentity(req);
 
         // 3. Response
         // 201: created
-        return ResponseEntity.status(HttpStatus.CREATED).body(profileId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newMember.getId());
     }
 
     //1. (브라우저) 로그인 요청
@@ -80,7 +80,7 @@ public class AuthController {
         // 1. username, pw 인증 확인
         //   1.1 username으로 login테이블에서 조회후 id, secret까지 조회
         Optional<AuthMember> login = repo.findByName(name);
-        System.out.println(login);
+        System.out.println("login: " + login);
         // username에 매칭이 되는 레코드가 없는 상태
         if(!login.isPresent()) {
             // 401 Unauthorized
@@ -102,6 +102,7 @@ public class AuthController {
         AuthMember l = login.get();
         // 2. profile 정보를 조회하여 인증키 생성(JWT)
         Optional<AuthFinancialHistory> finanHistory = finanHistoryRepo.findByMember_Id(l.getId());
+        System.out.println(finanHistory);
         // 로그인정보와 프로필 정보가 제대로 연결 안됨.
         if(!finanHistory.isPresent()) {
             // 409 conflict: 데이터 현재 상태가 안 맞음

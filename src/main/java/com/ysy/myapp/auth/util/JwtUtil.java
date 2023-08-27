@@ -63,11 +63,11 @@ public class JwtUtil {
         }
     }
 
-    public String extractUserId(String token) {
+    public String extractUserId(String token){
         AuthMember authMember = validateToken(token);
         if (authMember != null) {
             return String.valueOf(authMember.getId());
         }
-        return null;
+        return "unknown";
     }
 }

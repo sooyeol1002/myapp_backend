@@ -6,6 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,10 +29,16 @@ public class AuthMember {
     private long withdraw;
     @Column(nullable = false)
     private long balance;
+    @Column(nullable = false)
+    private LocalDate date;
 
-    @JoinColumn(name = "financial_history_id") // 외래 키 컬럼 이름
-    private long financialHistoryId;
+    @OneToMany(mappedBy = "member")
+    @Builder.Default
+    private List<AuthFinancialHistory> financialHistories = new ArrayList<>();
 
-    public AuthMember(String name, String password, long phone, String email) {
+    public void addFinancialHistory(AuthFinancialHistory financialHistory) {
+        financialHistories.add(financialHistory);
+        financialHistory.setMember(this);
     }
+
 }

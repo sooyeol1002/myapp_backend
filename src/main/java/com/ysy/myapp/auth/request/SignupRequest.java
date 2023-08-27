@@ -5,6 +5,9 @@ import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Data
 @NoArgsConstructor
 public class SignupRequest {
@@ -12,21 +15,28 @@ public class SignupRequest {
     private String password;
     private long phone;
     private String email;
+    private String date;
+    private long deposit;
+    private long withdraw;
+    private long balance;
 
-    public String getDate() {
-        return null;
+    public LocalDate getParsedDate() {
+        if (date == null || date.isEmpty()) {
+            return null;
+        }
+        return LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
     }
 
     public long getDeposit() {
-        return 0;
+        return deposit;
     }
 
     public long getWithdraw() {
-        return 0;
+        return withdraw;
     }
 
     public long getBalance() {
-        return 0;
+        return balance;
     }
 
 }

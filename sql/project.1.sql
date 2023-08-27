@@ -1,3 +1,4 @@
+CREATE DATABASE myapp;
 use myapp;
 
 create table member (
@@ -17,5 +18,6 @@ primary key (date)
 ) engine=InnoDB;
 /*
 member와 financial_history의 테이블을 만들었음.
-
 */
+select * from auth_member;
+select * from auth_financial_history;
