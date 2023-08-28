@@ -69,11 +69,6 @@ public class AuthService {
 
     @Transactional
     public AuthFinancialHistory createAndAddFinancialHistory(AuthFinancialHistory financialHistory) {
-        if (financialHistory.getId() <= 0 && !entityManager.contains(financialHistory)) {
-            financialHistory = entityManager.merge(financialHistory);
-        }
-
-        System.out.println("Creating and adding financial history...");
         if (financialHistory == null) {
             throw new IllegalArgumentException("Financial history data is missing");
         }
@@ -83,34 +78,8 @@ public class AuthService {
             throw new IllegalArgumentException("Member data is missing");
         }
 
-        LocalDate date = financialHistory.getDate();
-        if (date == null) {
-            date = LocalDate.now();
-        }
-
-        // 특정 회원의 특정 날짜에 대한 AuthFinancialHistory를 가져오기 위한 메서드 필요
-        Optional<AuthFinancialHistory> existingFinancialHistory = finanHistoryRepo.findByMemberAndDate(member, date);
-        if (existingFinancialHistory.isPresent()) {
-            AuthFinancialHistory existingHistory = existingFinancialHistory.get();
-            System.out.println("Existing financial history found: " + existingHistory);
-
-            // 기존 기록을 업데이트하는 로직
-            existingHistory.setDeposit(financialHistory.getDeposit());
-            existingHistory.setWithdraw(financialHistory.getWithdraw());
-            existingHistory.setBalance(financialHistory.getBalance());
-
-            return finanHistoryRepo.save(existingHistory); // 이미 기록이 있다면 그 기록을 반환
-        }
-
-        AuthFinancialHistory newFinancialHistory = new AuthFinancialHistory();
-        newFinancialHistory.setDate(date);
-        newFinancialHistory.setDeposit(financialHistory.getDeposit());
-        newFinancialHistory.setWithdraw(financialHistory.getWithdraw());
-        newFinancialHistory.setBalance(financialHistory.getBalance());
-        newFinancialHistory.setMember(member);
-
-        AuthFinancialHistory savedFinancialHistory = finanHistoryRepo.save(newFinancialHistory);
-        System.out.println("New financial history saved: " + savedFinancialHistory);
+        AuthFinancialHistory savedFinancialHistory = finanHistoryRepo.save(financialHistory);
+        System.out.println("Financial history saved: " + savedFinancialHistory);
 
         if (member.getFinancialHistories() == null) {
             member.setFinancialHistories(new ArrayList<>());

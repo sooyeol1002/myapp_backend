@@ -5,6 +5,7 @@ import com.ysy.myapp.auth.entity.AuthFinancialHistoryRepository;
 import com.ysy.myapp.auth.entity.AuthMember;
 import com.ysy.myapp.auth.entity.AuthMemberRepository;
 import com.ysy.myapp.auth.request.DepositRequest;
+import com.ysy.myapp.auth.request.WithdrawRequest;
 import com.ysy.myapp.auth.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -115,14 +116,9 @@ public class AuthFinancialHistoryController {
             String token = authorizationHeader.replace("Bearer ", "");
             String userId = jwtUtil.extractUserId(token);
 
-            LocalDate selectedDate = request.getSelectedDate();
-            if (selectedDate == null) {
-                selectedDate = LocalDate.now();
-            }
-            // 로그로 받은 데이터 값 확인
+            LocalDate selectedDate = request.getSelectedDate() != null ? request.getSelectedDate() : LocalDate.now();
             System.out.println("Received date: " + request.getSelectedDate());
             System.out.println("Received deposit amount: " + request.getDeposit());
-
 
             if (userId == null) {
                 Map<String, Object> res = new HashMap<>();
@@ -144,13 +140,14 @@ public class AuthFinancialHistoryController {
             Optional<AuthFinancialHistory> existingHistory = member.getFinancialHistories().stream()
                     .filter(history -> history.getDate().equals(finalSelectedDate))
                     .findFirst();
+
             AuthFinancialHistory savedFinancialHistory;
             if (existingHistory.isPresent()) {
                 // 기존 입금 기록에 추가
                 AuthFinancialHistory currentHistory = existingHistory.get();
                 currentHistory.setDeposit(currentHistory.getDeposit() + request.getDeposit());
                 currentHistory.setBalance(currentHistory.getBalance() + request.getDeposit());
-                savedFinancialHistory = authService.createAndAddFinancialHistory(currentHistory);
+                savedFinancialHistory = repo.save(currentHistory);
             } else {
                 // 입금 기록 생성 및 저장
                 AuthFinancialHistory financialHistory = AuthFinancialHistory.builder()
@@ -163,7 +160,10 @@ public class AuthFinancialHistoryController {
                 savedFinancialHistory = authService.createAndAddFinancialHistory(financialHistory);
             }
 
-            // 응답 데이터 생성
+            member.setDeposit(member.getDeposit() + request.getDeposit());
+            member.setBalance(member.getBalance() + request.getDeposit());
+            authMemberRepo.save(member);
+
             Map<String, Object> res = new HashMap<>();
             res.put("data", savedFinancialHistory);
             res.put("message", "Deposit created");
@@ -174,6 +174,78 @@ public class AuthFinancialHistoryController {
             Map<String, Object> res = new HashMap<>();
             res.put("data", null);
             res.put("message", "Failed to create deposit");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
+        }
+    }
+
+    @Auth
+    @PostMapping("/withdraw")
+    public ResponseEntity<Map<String, Object>> withdraw(
+            @RequestBody WithdrawRequest request,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            // JWT 토큰에서 사용자 ID 추출
+            String token = authorizationHeader.replace("Bearer ", "");
+            String userId = jwtUtil.extractUserId(token);
+
+            LocalDate selectedDate = request.getSelectedDate() != null ? request.getSelectedDate() : LocalDate.now();
+            System.out.println("Received date: " + request.getSelectedDate());
+            System.out.println("Received withdraw amount: " + request.getWithdraw());
+
+            if (userId == null) {
+                Map<String, Object> res = new HashMap<>();
+                res.put("data", null);
+                res.put("message", "Invalid token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+            }
+
+            // 사용자 ID로 회원 정보 가져오기
+            AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+
+            if (member == null) {
+                Map<String, Object> res = new HashMap<>();
+                res.put("data", null);
+                res.put("message", "Member data is missing");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            }
+            LocalDate finalSelectedDate = selectedDate;
+            Optional<AuthFinancialHistory> existingHistory = member.getFinancialHistories().stream()
+                    .filter(history -> history.getDate().equals(finalSelectedDate))
+                    .findFirst();
+
+            AuthFinancialHistory savedFinancialHistory;
+            if (existingHistory.isPresent()) {
+                // 기존 출금 기록에 추가
+                AuthFinancialHistory currentHistory = existingHistory.get();
+                currentHistory.setWithdraw(currentHistory.getWithdraw() + request.getWithdraw());
+                currentHistory.setBalance(currentHistory.getBalance() - request.getWithdraw());
+                savedFinancialHistory = repo.save(currentHistory);
+            } else {
+                // 출금 기록 생성 및 저장
+                AuthFinancialHistory financialHistory = AuthFinancialHistory.builder()
+                        .date(selectedDate) // 선택한 날짜 사용
+                        .withdraw(request.getWithdraw())
+                        .balance(request.getBalance())
+                        .member(member)
+                        .build();
+
+                savedFinancialHistory = authService.createAndAddFinancialHistory(financialHistory);
+            }
+
+            member.setWithdraw(member.getWithdraw() + request.getWithdraw());
+            member.setBalance(member.getBalance() - request.getWithdraw());
+            authMemberRepo.save(member);
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("data", savedFinancialHistory);
+            res.put("message", "Withdraw created");
+            return ResponseEntity.status(HttpStatus.CREATED).body(res);
+
+        } catch (Exception e) {
+            // 예외 처리
+            Map<String, Object> res = new HashMap<>();
+            res.put("data", null);
+            res.put("message", "Failed to create withdraw");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
         }
     }
