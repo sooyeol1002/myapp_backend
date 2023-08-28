@@ -7,10 +7,12 @@ import com.ysy.myapp.auth.entity.AuthMemberRepository;
 import com.ysy.myapp.auth.request.DepositRequest;
 import com.ysy.myapp.auth.request.WithdrawRequest;
 import com.ysy.myapp.auth.util.JwtUtil;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -35,11 +37,6 @@ public class AuthFinancialHistoryController {
     private AuthService authService;
     @Autowired
     private DepositRequest depositRequest;
-    @GetMapping
-    public List<AuthFinancialHistory> view(){
-        List<AuthFinancialHistory> list = repo.findAllByOrderByDate();
-        return list;
-    }
 
     // 기록추가
     @Auth
@@ -249,14 +246,6 @@ public class AuthFinancialHistoryController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
         }
     }
-
-    // 날짜값으로 데이터를 조회
-    @GetMapping("/by-date/{date}")
-    public ResponseEntity<List<AuthFinancialHistory>> getFinancialHistoryByDate(@PathVariable String date) {
-        List<AuthFinancialHistory> filteredList = repo.findByDate(LocalDate.parse(date));
-        return ResponseEntity.ok(filteredList);
-    }
-
     // 잔액계산
     @PostMapping("calculate-balance")
     public ResponseEntity<Map<String, Long>> calculateBalance(@RequestBody Map<String, Long> data) {
@@ -275,13 +264,66 @@ public class AuthFinancialHistoryController {
 
         return ResponseEntity.ok(res);
     }
+    @GetMapping
+    public List<AuthFinancialHistory> view(@RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String userId = jwtUtil.extractUserId(token);
+
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+        }
+
+        AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+
+        if (member == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Member data is missing");
+        }
+
+        // 해당 멤버의 기록만 반환
+        return repo.findAllByMemberOrderByDate(member);
+    }
+
+    // 날짜값으로 데이터를 조회
+    @GetMapping("/by-date/{date}")
+    public ResponseEntity<List<AuthFinancialHistory>> getFinancialHistoryByDate(@PathVariable String date, @RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String userId = jwtUtil.extractUserId(token);
+
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+        }
+
+        AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+
+        if (member == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Member data is missing");
+        }
+
+        List<AuthFinancialHistory> filteredList = repo.findByDateAndMember(LocalDate.parse(date), member);
+        return ResponseEntity.ok(filteredList);
+    }
+
 
     // 월별 DB 저장값 조회
-    // 2023-05 이런형식으로 조회해야 조회가 됨.
-    @GetMapping("/by-month/{month}")
-    public ResponseEntity<List<AuthFinancialHistory>> getBalanceByMonth(@PathVariable String month) {
-        // System.out.println("Requested month: " + month);
-        List<AuthFinancialHistory> financialHistories = repo.findByDate(LocalDate.parse(month));
+    @GetMapping("/by-month/{year}-{month}")
+    public ResponseEntity<List<AuthFinancialHistory>> getBalanceByMonth(@PathVariable int year, @PathVariable int month, @RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String userId = jwtUtil.extractUserId(token);
+
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+        }
+
+        AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+
+        if (member == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Member data is missing");
+        }
+
+        LocalDate startOfMonth = LocalDate.of(year, month, 1);
+        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+        List<AuthFinancialHistory> financialHistories = repo.findByDateBetweenAndMember(startOfMonth, endOfMonth, member);
         return ResponseEntity.ok(financialHistories);
     }
 }

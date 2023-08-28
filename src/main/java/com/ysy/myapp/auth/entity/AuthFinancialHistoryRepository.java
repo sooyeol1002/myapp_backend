@@ -12,9 +12,9 @@ public interface AuthFinancialHistoryRepository extends JpaRepository<AuthFinanc
     Optional<AuthFinancialHistory> findByMember_Id(Long id);
     List<AuthFinancialHistory> findAllByOrderByDate();
 
-    List<AuthFinancialHistory> findByDate(LocalDate date);
+    List<AuthFinancialHistory> findAllByMemberOrderByDate(AuthMember member);
 
-    public Optional<AuthFinancialHistory> findByMember(AuthMember member);
+    List<AuthFinancialHistory> findByDateAndMember(LocalDate parse, AuthMember member);
 
-    Optional<AuthFinancialHistory> findByMemberAndDate(AuthMember member, LocalDate date);
+    List<AuthFinancialHistory> findByDateBetweenAndMember(LocalDate startOfMonth, LocalDate endOfMonth, AuthMember member);
 }
