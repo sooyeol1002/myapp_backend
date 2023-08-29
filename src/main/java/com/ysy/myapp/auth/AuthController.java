@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.lang.reflect.Member;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -101,10 +102,9 @@ public class AuthController {
 
         AuthMember l = login.get();
         // 2. profile 정보를 조회하여 인증키 생성(JWT)
-        Optional<AuthFinancialHistory> finanHistory = finanHistoryRepo.findByMember_Id(l.getId());
-        System.out.println(finanHistory);
+        List<AuthFinancialHistory> finanHistory = finanHistoryRepo.findByMember_Id(l.getId());
         // 로그인정보와 프로필 정보가 제대로 연결 안됨.
-        if(!finanHistory.isPresent()) {
+        if(finanHistory.isEmpty()) {
             // 409 conflict: 데이터 현재 상태가 안 맞음
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }

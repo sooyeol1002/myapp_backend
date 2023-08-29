@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface AuthFinancialHistoryRepository extends JpaRepository<AuthFinancialHistory, Long> {
-    Optional<AuthFinancialHistory> findByMember_Id(Long id);
+    List<AuthFinancialHistory> findByMember_Id(Long id);
     List<AuthFinancialHistory> findAllByOrderByDate();
 
     List<AuthFinancialHistory> findAllByMemberOrderByDate(AuthMember member);

@@ -69,6 +69,7 @@ public class AuthFinancialHistoryController {
 
             // 사용자 ID로 회원 정보 가져오기
             AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+            String name = member.getName();
 
             if (member == null) {
                 Map<String, Object> res = new HashMap<>();
@@ -86,6 +87,7 @@ public class AuthFinancialHistoryController {
             // 응답 데이터 생성
             Map<String, Object> res = new HashMap<>();
             res.put("data", savedFinancialHistory);
+            res.put("name", name);
             res.put("message", "created");
             return ResponseEntity.status(HttpStatus.CREATED).body(res);
 
