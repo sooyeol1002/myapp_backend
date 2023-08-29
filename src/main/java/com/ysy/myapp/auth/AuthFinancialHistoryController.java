@@ -69,7 +69,6 @@ public class AuthFinancialHistoryController {
 
             // 사용자 ID로 회원 정보 가져오기
             AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
-            String name = member.getName();
 
             if (member == null) {
                 Map<String, Object> res = new HashMap<>();
@@ -87,7 +86,6 @@ public class AuthFinancialHistoryController {
             // 응답 데이터 생성
             Map<String, Object> res = new HashMap<>();
             res.put("data", savedFinancialHistory);
-            res.put("name", name);
             res.put("message", "created");
             return ResponseEntity.status(HttpStatus.CREATED).body(res);
 
@@ -327,5 +325,39 @@ public class AuthFinancialHistoryController {
 
         List<AuthFinancialHistory> financialHistories = repo.findByDateBetweenAndMember(startOfMonth, endOfMonth, member);
         return ResponseEntity.ok(financialHistories);
+    }
+
+    @GetMapping("/getName")
+    public ResponseEntity<Map<String, Object>> getUserName(@RequestHeader("Authorization") String authorizationHeader) {
+        Map<String, Object> res = new HashMap<>();
+
+        try {
+            String token = authorizationHeader.replace("Bearer ", "");
+            String userId = jwtUtil.extractUserId(token);
+
+            if (userId == null) {
+                res.put("data", null);
+                res.put("message", "Invalid token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+            }
+
+            AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null); // authMemberRepo 또한 예시입니다.
+
+            if (member == null) {
+                res.put("data", null);
+                res.put("message", "Member data is missing");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            }
+
+            String name = member.getName();
+            res.put("name", name);
+            res.put("message", "success");
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+
+        } catch (Exception e) {
+            res.put("data", null);
+            res.put("message", "Failed to fetch the username");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
+        }
     }
 }
