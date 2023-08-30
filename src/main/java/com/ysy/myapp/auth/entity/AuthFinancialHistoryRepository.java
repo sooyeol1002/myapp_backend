@@ -17,4 +17,6 @@ public interface AuthFinancialHistoryRepository extends JpaRepository<AuthFinanc
     List<AuthFinancialHistory> findByDateAndMember(LocalDate parse, AuthMember member);
 
     List<AuthFinancialHistory> findByDateBetweenAndMember(LocalDate startOfMonth, LocalDate endOfMonth, AuthMember member);
+
+    Optional<AuthFinancialHistory> findByDate(LocalDate date);
 }

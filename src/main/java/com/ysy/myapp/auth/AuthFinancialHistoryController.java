@@ -362,8 +362,8 @@ public class AuthFinancialHistoryController {
     }
 
     // 기록 수정
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> updateFinancialHistory(@PathVariable Long id,
+    @PutMapping("/update/{date}")
+    public ResponseEntity<Map<String, Object>> updateFinancialHistory(@PathVariable String dateStr,
                                                                       @RequestBody AuthFinancialHistory updatedHistory,
                                                                       @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
@@ -372,8 +372,14 @@ public class AuthFinancialHistoryController {
         if (userId == null) {
             return unauthorizedResponse("Invalid token");
         }
+        LocalDate date;
+        try {
+            date = LocalDate.parse(dateStr);
+        } catch (DateTimeParseException e) {
+            return badRequestResponse("잘못된 날짜 형식입니다.");
+        }
 
-        Optional<AuthFinancialHistory> existingHistory = repo.findById(id);
+        Optional<AuthFinancialHistory> existingHistory = repo.findByDate(date);
         if (existingHistory.isEmpty()) {
             return badRequestResponse("금융 기록을 찾을 수 없습니다.");
         }
