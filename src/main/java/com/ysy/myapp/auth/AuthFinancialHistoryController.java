@@ -341,7 +341,7 @@ public class AuthFinancialHistoryController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
             }
 
-            AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null); // authMemberRepo 또한 예시입니다.
+            AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
 
             if (member == null) {
                 res.put("data", null);
@@ -359,5 +359,71 @@ public class AuthFinancialHistoryController {
             res.put("message", "Failed to fetch the username");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
         }
+    }
+
+    // 기록 수정
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Map<String, Object>> updateFinancialHistory(@PathVariable Long id,
+                                                                      @RequestBody AuthFinancialHistory updatedHistory,
+                                                                      @RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String userId = jwtUtil.extractUserId(token);
+
+        if (userId == null) {
+            return unauthorizedResponse("Invalid token");
+        }
+
+        Optional<AuthFinancialHistory> existingHistory = repo.findById(id);
+        if (existingHistory.isEmpty()) {
+            return badRequestResponse("금융 기록을 찾을 수 없습니다.");
+        }
+
+        AuthFinancialHistory currentHistory = existingHistory.get();
+        currentHistory.setDate(updatedHistory.getDate());
+        currentHistory.setDeposit(updatedHistory.getDeposit());
+        currentHistory.setWithdraw(updatedHistory.getWithdraw());
+        currentHistory.setBalance(updatedHistory.getBalance());
+
+        AuthFinancialHistory savedFinancialHistory = repo.save(currentHistory);
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("data", savedFinancialHistory);
+        res.put("message", "수정완료");
+        return ResponseEntity.ok(res);
+    }
+
+    // ID로 기록 삭제
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String, Object>> deleteFinancialHistory(@PathVariable Long id,
+                                                                      @RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        String userId = jwtUtil.extractUserId(token);
+
+        if (userId == null) {
+            return unauthorizedResponse("Invalid token");
+        }
+
+        if (repo.existsById(id)) {
+            repo.deleteById(id);
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("message", "삭제 완료");
+            return ResponseEntity.ok(res);
+        } else {
+            return badRequestResponse("금융 기록을 찾을 수 없습니다.");
+        }
+    }
+
+    // 공통응답
+    private ResponseEntity<Map<String, Object>> unauthorizedResponse(String message) {
+        Map<String, Object> res = new HashMap<>();
+        res.put("message", message);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+    }
+
+    private ResponseEntity<Map<String, Object>> badRequestResponse(String message) {
+        Map<String, Object> res = new HashMap<>();
+        res.put("message", message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 }
