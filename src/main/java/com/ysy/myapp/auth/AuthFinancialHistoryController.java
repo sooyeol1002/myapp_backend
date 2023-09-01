@@ -7,7 +7,10 @@ import com.ysy.myapp.auth.entity.AuthMemberRepository;
 import com.ysy.myapp.auth.request.DepositRequest;
 import com.ysy.myapp.auth.request.WithdrawRequest;
 import com.ysy.myapp.auth.util.JwtUtil;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Tag(name="금융기록 관리 처리 API")
 @RestController
 @RequestMapping(value = "/financialHistories")
 public class AuthFinancialHistoryController {
@@ -39,6 +43,7 @@ public class AuthFinancialHistoryController {
     private DepositRequest depositRequest;
 
     // 기록추가
+    @Operation(summary = "금융기록 추가", security = { @SecurityRequirement(name = "bearer-key") })
     @Auth
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addFinancialHistory(
@@ -103,6 +108,8 @@ public class AuthFinancialHistoryController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
         }
     }
+
+    @Operation(summary = "금융기록추가, 입금")
     @Auth
     @PostMapping("/deposit")
     public ResponseEntity<Map<String, Object>> deposit(
@@ -175,6 +182,7 @@ public class AuthFinancialHistoryController {
         }
     }
 
+    @Operation(summary = "금융기록 추가, 출금")
     @Auth
     @PostMapping("/withdraw")
     public ResponseEntity<Map<String, Object>> withdraw(
@@ -362,13 +370,15 @@ public class AuthFinancialHistoryController {
     }
 
     // 기록 수정
-    @PutMapping("/update/{date}")
+    @PutMapping("/update/{dateStr}")
     public ResponseEntity<Map<String, Object>> updateFinancialHistory(@PathVariable String dateStr,
                                                                       @RequestBody AuthFinancialHistory updatedHistory,
                                                                       @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
         String userId = jwtUtil.extractUserId(token);
 
+
+        System.out.println(dateStr);
         if (userId == null) {
             return unauthorizedResponse("Invalid token");
         }
@@ -398,9 +408,10 @@ public class AuthFinancialHistoryController {
         return ResponseEntity.ok(res);
     }
 
-    // ID로 기록 삭제
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Map<String, Object>> deleteFinancialHistory(@PathVariable Long id,
+    // 날짜로 기록 삭제
+    @Transactional
+    @DeleteMapping("/delete/{date}")
+    public ResponseEntity<Map<String, Object>> deleteFinancialHistory(@PathVariable String date,
                                                                       @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
         String userId = jwtUtil.extractUserId(token);
@@ -408,10 +419,18 @@ public class AuthFinancialHistoryController {
         if (userId == null) {
             return unauthorizedResponse("Invalid token");
         }
+        Optional<AuthMember> optionalAuthMember = authMemberRepo.findById(String.valueOf(Long.parseLong(userId)));
+        if (!optionalAuthMember.isPresent()) {
+            return badRequestResponse("유저를 찾을 수 없습니다.");
+        }
+        Long memberId = optionalAuthMember.get().getId();
 
-        if (repo.existsById(id)) {
-            repo.deleteById(id);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(date, formatter);
 
+        int deletedCount = repo.deleteByDateAndId(localDate, memberId);
+
+        if (deletedCount > 0) {
             Map<String, Object> res = new HashMap<>();
             res.put("message", "삭제 완료");
             return ResponseEntity.ok(res);
