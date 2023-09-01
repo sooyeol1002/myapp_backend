@@ -1,4 +1,4 @@
-package com.ysy.myapp.auth.util;
+package com.ysy.myapp.project.util;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 public class HashUtil {

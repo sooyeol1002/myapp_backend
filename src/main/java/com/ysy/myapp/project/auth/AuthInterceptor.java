@@ -1,7 +1,7 @@
-package com.ysy.myapp.auth;
+package com.ysy.myapp.project.auth;
 
-import com.ysy.myapp.auth.entity.AuthMember;
-import com.ysy.myapp.auth.util.JwtUtil;
+import com.ysy.myapp.project.entity.Member;
+import com.ysy.myapp.project.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             // 인증 토큰이 있으면
             // 3. 인증토큰 검증 및 페이로드(subject/claim) 객체화하기
             // 메시지 개념에서 서로 주고받는 데이터를 페이로드(payload)
-            AuthMember member =
+            Member member =
                     jwt.validateToken(token);
             if(member == null) {
                 // 401: Unauthorized

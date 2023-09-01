@@ -1,12 +1,14 @@
-package com.ysy.myapp.auth;
+package com.ysy.myapp.project.controller;
 
-import com.ysy.myapp.auth.entity.AuthFinancialHistory;
-import com.ysy.myapp.auth.entity.AuthFinancialHistoryRepository;
-import com.ysy.myapp.auth.entity.AuthMember;
-import com.ysy.myapp.auth.entity.AuthMemberRepository;
-import com.ysy.myapp.auth.request.DepositRequest;
-import com.ysy.myapp.auth.request.WithdrawRequest;
-import com.ysy.myapp.auth.util.JwtUtil;
+import com.ysy.myapp.project.auth.Auth;
+import com.ysy.myapp.project.auth.AuthService;
+import com.ysy.myapp.project.entity.FinancialHistory;
+import com.ysy.myapp.project.entity.FinancialHistoryRepository;
+import com.ysy.myapp.project.entity.Member;
+import com.ysy.myapp.project.entity.MemberRepository;
+import com.ysy.myapp.project.request.DepositRequest;
+import com.ysy.myapp.project.request.WithdrawRequest;
+import com.ysy.myapp.project.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,15 +30,15 @@ import java.util.Optional;
 @Tag(name="금융기록 관리 처리 API")
 @RestController
 @RequestMapping(value = "/financialHistories")
-public class AuthFinancialHistoryController {
-    private List<AuthFinancialHistory> financialHistoryList;
-    private Map<AuthFinancialHistory, Long> balanceData = new HashMap<>();
+public class FinancialHistoryController {
+    private List<FinancialHistory> financialHistoryList;
+    private Map<FinancialHistory, Long> balanceData = new HashMap<>();
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
-    private AuthMemberRepository authMemberRepo;
+    private MemberRepository authMemberRepo;
     @Autowired
-    private AuthFinancialHistoryRepository repo;
+    private FinancialHistoryRepository repo;
     @Autowired
     private AuthService authService;
     @Autowired
@@ -47,7 +49,7 @@ public class AuthFinancialHistoryController {
     @Auth
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addFinancialHistory(
-            @RequestBody AuthFinancialHistory financialHistory,
+            @RequestBody FinancialHistory financialHistory,
             @RequestHeader("Authorization") String authorizationHeader) {
         try {
             // 클라이언트에서 전송한 date 값을 올바르게 파싱하여 LocalDate로 변환
@@ -73,7 +75,7 @@ public class AuthFinancialHistoryController {
             }
 
             // 사용자 ID로 회원 정보 가져오기
-            AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+            Member member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
 
             if (member == null) {
                 Map<String, Object> res = new HashMap<>();
@@ -86,7 +88,7 @@ public class AuthFinancialHistoryController {
             financialHistory.setMember(member);
             financialHistory.setDate(LocalDate.parse(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
 
-            AuthFinancialHistory savedFinancialHistory = authService.createAndAddFinancialHistory(financialHistory);
+            FinancialHistory savedFinancialHistory = authService.createAndAddFinancialHistory(financialHistory);
 
             // 응답 데이터 생성
             Map<String, Object> res = new HashMap<>();
@@ -132,7 +134,7 @@ public class AuthFinancialHistoryController {
             }
 
             // 사용자 ID로 회원 정보 가져오기
-            AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+            Member member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
 
             if (member == null) {
                 Map<String, Object> res = new HashMap<>();
@@ -141,20 +143,20 @@ public class AuthFinancialHistoryController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
             }
             LocalDate finalSelectedDate = selectedDate;
-            Optional<AuthFinancialHistory> existingHistory = member.getFinancialHistories().stream()
+            Optional<FinancialHistory> existingHistory = member.getFinancialHistories().stream()
                     .filter(history -> history.getDate().equals(finalSelectedDate))
                     .findFirst();
 
-            AuthFinancialHistory savedFinancialHistory;
+            FinancialHistory savedFinancialHistory;
             if (existingHistory.isPresent()) {
                 // 기존 입금 기록에 추가
-                AuthFinancialHistory currentHistory = existingHistory.get();
+                FinancialHistory currentHistory = existingHistory.get();
                 currentHistory.setDeposit(currentHistory.getDeposit() + request.getDeposit());
                 currentHistory.setBalance(currentHistory.getBalance() + request.getDeposit());
                 savedFinancialHistory = repo.save(currentHistory);
             } else {
                 // 입금 기록 생성 및 저장
-                AuthFinancialHistory financialHistory = AuthFinancialHistory.builder()
+                FinancialHistory financialHistory = FinancialHistory.builder()
                         .date(selectedDate) // 선택한 날짜 사용
                         .deposit(request.getDeposit())
                         .balance(request.getBalance())
@@ -205,7 +207,7 @@ public class AuthFinancialHistoryController {
             }
 
             // 사용자 ID로 회원 정보 가져오기
-            AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+            Member member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
 
             if (member == null) {
                 Map<String, Object> res = new HashMap<>();
@@ -214,20 +216,20 @@ public class AuthFinancialHistoryController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
             }
             LocalDate finalSelectedDate = selectedDate;
-            Optional<AuthFinancialHistory> existingHistory = member.getFinancialHistories().stream()
+            Optional<FinancialHistory> existingHistory = member.getFinancialHistories().stream()
                     .filter(history -> history.getDate().equals(finalSelectedDate))
                     .findFirst();
 
-            AuthFinancialHistory savedFinancialHistory;
+            FinancialHistory savedFinancialHistory;
             if (existingHistory.isPresent()) {
                 // 기존 출금 기록에 추가
-                AuthFinancialHistory currentHistory = existingHistory.get();
+                FinancialHistory currentHistory = existingHistory.get();
                 currentHistory.setWithdraw(currentHistory.getWithdraw() + request.getWithdraw());
                 currentHistory.setBalance(currentHistory.getBalance() - request.getWithdraw());
                 savedFinancialHistory = repo.save(currentHistory);
             } else {
                 // 출금 기록 생성 및 저장
-                AuthFinancialHistory financialHistory = AuthFinancialHistory.builder()
+                FinancialHistory financialHistory = FinancialHistory.builder()
                         .date(selectedDate) // 선택한 날짜 사용
                         .withdraw(request.getWithdraw())
                         .balance(request.getBalance())
@@ -273,7 +275,7 @@ public class AuthFinancialHistoryController {
         return ResponseEntity.ok(res);
     }
     @GetMapping
-    public List<AuthFinancialHistory> view(@RequestHeader("Authorization") String authorizationHeader) {
+    public List<FinancialHistory> view(@RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
         String userId = jwtUtil.extractUserId(token);
 
@@ -281,7 +283,7 @@ public class AuthFinancialHistoryController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
 
-        AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+        Member member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
 
         if (member == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Member data is missing");
@@ -293,7 +295,7 @@ public class AuthFinancialHistoryController {
 
     // 날짜값으로 데이터를 조회
     @GetMapping("/by-date/{date}")
-    public ResponseEntity<List<AuthFinancialHistory>> getFinancialHistoryByDate(@PathVariable String date, @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<List<FinancialHistory>> getFinancialHistoryByDate(@PathVariable String date, @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
         String userId = jwtUtil.extractUserId(token);
 
@@ -301,20 +303,20 @@ public class AuthFinancialHistoryController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
 
-        AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+        Member member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
 
         if (member == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Member data is missing");
         }
 
-        List<AuthFinancialHistory> filteredList = repo.findByDateAndMember(LocalDate.parse(date), member);
+        List<FinancialHistory> filteredList = repo.findByDateAndMember(LocalDate.parse(date), member);
         return ResponseEntity.ok(filteredList);
     }
 
 
     // 월별 DB 저장값 조회
     @GetMapping("/by-month/{year}-{month}")
-    public ResponseEntity<List<AuthFinancialHistory>> getBalanceByMonth(@PathVariable int year, @PathVariable int month, @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<List<FinancialHistory>> getBalanceByMonth(@PathVariable int year, @PathVariable int month, @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
         String userId = jwtUtil.extractUserId(token);
 
@@ -322,7 +324,7 @@ public class AuthFinancialHistoryController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
 
-        AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+        Member member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
 
         if (member == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Member data is missing");
@@ -331,7 +333,7 @@ public class AuthFinancialHistoryController {
         LocalDate startOfMonth = LocalDate.of(year, month, 1);
         LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
 
-        List<AuthFinancialHistory> financialHistories = repo.findByDateBetweenAndMember(startOfMonth, endOfMonth, member);
+        List<FinancialHistory> financialHistories = repo.findByDateBetweenAndMember(startOfMonth, endOfMonth, member);
         return ResponseEntity.ok(financialHistories);
     }
 
@@ -349,7 +351,7 @@ public class AuthFinancialHistoryController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
             }
 
-            AuthMember member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
+            Member member = authMemberRepo.findById(String.valueOf(Long.parseLong(userId))).orElse(null);
 
             if (member == null) {
                 res.put("data", null);
@@ -370,9 +372,10 @@ public class AuthFinancialHistoryController {
     }
 
     // 기록 수정
-    @PutMapping("/update/{dateStr}")
-    public ResponseEntity<Map<String, Object>> updateFinancialHistory(@PathVariable String dateStr,
-                                                                      @RequestBody AuthFinancialHistory updatedHistory,
+    @PutMapping("/update/{no}/{dateStr}")
+    public ResponseEntity<Map<String, Object>> updateFinancialHistory(@PathVariable("id") long id,
+                                                                      @PathVariable String dateStr,
+                                                                      @RequestBody FinancialHistory updatedHistory,
                                                                       @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
         String userId = jwtUtil.extractUserId(token);
@@ -389,18 +392,19 @@ public class AuthFinancialHistoryController {
             return badRequestResponse("잘못된 날짜 형식입니다.");
         }
 
-        Optional<AuthFinancialHistory> existingHistory = repo.findByDate(date);
+        Optional<FinancialHistory> existingHistory = repo.findByMember_DateAndId(date,id);
         if (existingHistory.isEmpty()) {
             return badRequestResponse("금융 기록을 찾을 수 없습니다.");
         }
 
-        AuthFinancialHistory currentHistory = existingHistory.get();
+        FinancialHistory currentHistory = existingHistory.get();
         currentHistory.setDate(updatedHistory.getDate());
         currentHistory.setDeposit(updatedHistory.getDeposit());
         currentHistory.setWithdraw(updatedHistory.getWithdraw());
         currentHistory.setBalance(updatedHistory.getBalance());
+        currentHistory.setId(updatedHistory.getId());
 
-        AuthFinancialHistory savedFinancialHistory = repo.save(currentHistory);
+        FinancialHistory savedFinancialHistory = repo.save(currentHistory);
 
         Map<String, Object> res = new HashMap<>();
         res.put("data", savedFinancialHistory);
@@ -419,7 +423,7 @@ public class AuthFinancialHistoryController {
         if (userId == null) {
             return unauthorizedResponse("Invalid token");
         }
-        Optional<AuthMember> optionalAuthMember = authMemberRepo.findById(String.valueOf(Long.parseLong(userId)));
+        Optional<Member> optionalAuthMember = authMemberRepo.findById(String.valueOf(Long.parseLong(userId)));
         if (!optionalAuthMember.isPresent()) {
             return badRequestResponse("유저를 찾을 수 없습니다.");
         }

@@ -1,12 +1,13 @@
-package com.ysy.myapp.auth;
+package com.ysy.myapp.project.controller;
 
-import com.ysy.myapp.auth.entity.AuthFinancialHistory;
-import com.ysy.myapp.auth.entity.AuthFinancialHistoryRepository;
-import com.ysy.myapp.auth.entity.AuthMember;
-import com.ysy.myapp.auth.entity.AuthMemberRepository;
-import com.ysy.myapp.auth.request.SignupRequest;
-import com.ysy.myapp.auth.util.HashUtil;
-import com.ysy.myapp.auth.util.JwtUtil;
+import com.ysy.myapp.project.auth.AuthService;
+import com.ysy.myapp.project.entity.FinancialHistory;
+import com.ysy.myapp.project.entity.FinancialHistoryRepository;
+import com.ysy.myapp.project.entity.Member;
+import com.ysy.myapp.project.entity.MemberRepository;
+import com.ysy.myapp.project.request.SignupRequest;
+import com.ysy.myapp.project.util.HashUtil;
+import com.ysy.myapp.project.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.lang.reflect.Member;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,10 +23,10 @@ import java.util.Optional;
 @RequestMapping("/auth")
 public class AuthController {
     @Autowired
-    private AuthMemberRepository repo;
+    private MemberRepository repo;
 
     @Autowired
-    private AuthFinancialHistoryRepository finanHistoryRepo;
+    private FinancialHistoryRepository finanHistoryRepo;
 
     @Autowired
     private AuthService service;
@@ -49,7 +49,7 @@ public class AuthController {
 
         // 2. Buisness Logic(데이터 처리)
         // profile, login 생성 트랜잭션 처리
-        AuthMember newMember = service.createIdentity(req);
+        Member newMember = service.createIdentity(req);
 
         // 3. Response
         // 201: created
@@ -80,7 +80,7 @@ public class AuthController {
         System.out.println(password);
         // 1. username, pw 인증 확인
         //   1.1 username으로 login테이블에서 조회후 id, secret까지 조회
-        Optional<AuthMember> login = repo.findByName(name);
+        Optional<Member> login = repo.findByName(name);
         System.out.println("login: " + login);
         // username에 매칭이 되는 레코드가 없는 상태
         if(!login.isPresent()) {
@@ -100,9 +100,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        AuthMember l = login.get();
+        Member l = login.get();
         // 2. profile 정보를 조회하여 인증키 생성(JWT)
-        List<AuthFinancialHistory> finanHistory = finanHistoryRepo.findByMember_Id(l.getId());
+        List<FinancialHistory> finanHistory = finanHistoryRepo.findByMember_Id(l.getId());
         // 로그인정보와 프로필 정보가 제대로 연결 안됨.
         if(finanHistory.isEmpty()) {
             // 409 conflict: 데이터 현재 상태가 안 맞음

@@ -1,4 +1,4 @@
-package com.ysy.myapp.auth;
+package com.ysy.myapp.project.auth;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

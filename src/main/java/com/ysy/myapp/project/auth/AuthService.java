@@ -1,28 +1,26 @@
-package com.ysy.myapp.auth;
+package com.ysy.myapp.project.auth;
 
-import com.ysy.myapp.auth.entity.AuthFinancialHistory;
-import com.ysy.myapp.auth.entity.AuthMember;
-import com.ysy.myapp.auth.entity.AuthFinancialHistoryRepository;
-import com.ysy.myapp.auth.entity.AuthMemberRepository;
-import com.ysy.myapp.auth.request.SignupRequest;
-import com.ysy.myapp.auth.util.HashUtil;
+import com.ysy.myapp.project.entity.FinancialHistory;
+import com.ysy.myapp.project.entity.Member;
+import com.ysy.myapp.project.entity.FinancialHistoryRepository;
+import com.ysy.myapp.project.entity.MemberRepository;
+import com.ysy.myapp.project.request.SignupRequest;
+import com.ysy.myapp.project.util.HashUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Optional;
 
 @Service
 @Transactional
 public class AuthService {
     @Autowired
-    private AuthMemberRepository repo;
+    private MemberRepository repo;
     @Autowired
-    private AuthFinancialHistoryRepository finanHistoryRepo;
+    private FinancialHistoryRepository finanHistoryRepo;
 
     @Autowired
     private HashUtil hash;
@@ -30,15 +28,15 @@ public class AuthService {
     private EntityManager entityManager;
 
     @Autowired
-    public AuthService(AuthMemberRepository repo, AuthFinancialHistoryRepository finanHistoryRepo) {
+    public AuthService(MemberRepository repo, FinancialHistoryRepository finanHistoryRepo) {
         this.repo = repo;
         this.finanHistoryRepo = finanHistoryRepo;
     }
     @Transactional
-    public AuthMember createIdentity(SignupRequest req) {
+    public Member createIdentity(SignupRequest req) {
         // 1. login 정보를 insert
-        AuthMember toSaveLogin =
-                AuthMember.builder()
+        Member toSaveLogin =
+                Member.builder()
                         .name(req.getName())
                         .secret(hash.createHash(req.getPassword()))
                         .deposit(0)
@@ -48,8 +46,8 @@ public class AuthService {
                         .build();
 
         // 2. profile 정보를 insert(login_id포함)하고 레코드의 id값을 가져옴;
-        AuthFinancialHistory toSaveFinancialHistory =
-                AuthFinancialHistory.builder()
+        FinancialHistory toSaveFinancialHistory =
+                FinancialHistory.builder()
                         .date(toSaveLogin.getDate())
                         .deposit(req.getDeposit())
                         .withdraw(req.getWithdraw())
@@ -60,7 +58,7 @@ public class AuthService {
         // 3. 로그인 정보에는 profile_id값만 저장
         toSaveLogin.addFinancialHistory(toSaveFinancialHistory);
 
-        AuthMember savedMember = repo.save(toSaveLogin);
+        Member savedMember = repo.save(toSaveLogin);
         createAndAddFinancialHistory(toSaveFinancialHistory);
 
         // 4. profile_id를 반환
@@ -68,17 +66,17 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthFinancialHistory createAndAddFinancialHistory(AuthFinancialHistory financialHistory) {
+    public FinancialHistory createAndAddFinancialHistory(FinancialHistory financialHistory) {
         if (financialHistory == null) {
             throw new IllegalArgumentException("Financial history data is missing");
         }
 
-        AuthMember member = financialHistory.getMember();
+        Member member = financialHistory.getMember();
         if (member == null) {
             throw new IllegalArgumentException("Member data is missing");
         }
 
-        AuthFinancialHistory savedFinancialHistory = finanHistoryRepo.save(financialHistory);
+        FinancialHistory savedFinancialHistory = finanHistoryRepo.save(financialHistory);
         System.out.println("Financial history saved: " + savedFinancialHistory);
 
         if (member.getFinancialHistories() == null) {

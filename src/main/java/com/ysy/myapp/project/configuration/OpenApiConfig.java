@@ -1,4 +1,4 @@
-package com.ysy.myapp.auth.configuration;
+package com.ysy.myapp.project.configuration;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

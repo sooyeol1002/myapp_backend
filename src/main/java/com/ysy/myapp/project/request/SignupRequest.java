@@ -1,7 +1,5 @@
-package com.ysy.myapp.auth.request;
+package com.ysy.myapp.project.request;
 
-import com.ysy.myapp.auth.entity.AuthMember;
-import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

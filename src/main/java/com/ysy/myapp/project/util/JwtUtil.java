@@ -1,12 +1,11 @@
-package com.ysy.myapp.auth.util;
+package com.ysy.myapp.project.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.ysy.myapp.auth.entity.AuthMember;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ysy.myapp.project.entity.Member;
 
 import java.util.Date;
 
@@ -38,7 +37,7 @@ public class JwtUtil {
                 .sign(algorithm);
     }
 
-    public AuthMember validateToken(String token) {
+    public Member validateToken(String token) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         // 검증 객체 생성
         JWTVerifier verifier = JWT.require(algorithm).build();
@@ -51,7 +50,7 @@ public class JwtUtil {
             Long id = Long.valueOf(decodedJWT.getSubject());
             String name = decodedJWT
                     .getClaim("name").asString();
-            return AuthMember.builder()
+            return Member.builder()
                     .id(id)
                     .name(name)
                     .build();
@@ -64,9 +63,9 @@ public class JwtUtil {
     }
 
     public String extractUserId(String token){
-        AuthMember authMember = validateToken(token);
-        if (authMember != null) {
-            return String.valueOf(authMember.getId());
+        Member member = validateToken(token);
+        if (member != null) {
+            return String.valueOf(member.getId());
         }
         return "unknown";
     }

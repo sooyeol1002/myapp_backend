@@ -1,4 +1,4 @@
-package com.ysy.myapp.auth.entity;
+package com.ysy.myapp.project.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity(name = "AuthMember")
-public class AuthMember {
+public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -34,9 +34,9 @@ public class AuthMember {
 
     @OneToMany(mappedBy = "member")
     @Builder.Default
-    private List<AuthFinancialHistory> financialHistories = new ArrayList<>();
+    private List<FinancialHistory> financialHistories = new ArrayList<>();
 
-    public void addFinancialHistory(AuthFinancialHistory financialHistory) {
+    public void addFinancialHistory(FinancialHistory financialHistory) {
         financialHistories.add(financialHistory);
         financialHistory.setMember(this);
     }

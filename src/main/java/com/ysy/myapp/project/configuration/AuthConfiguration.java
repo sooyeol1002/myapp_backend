@@ -1,7 +1,7 @@
-package com.ysy.myapp.auth.configuration;
+package com.ysy.myapp.project.configuration;
 
-import com.ysy.myapp.auth.util.HashUtil;
-import com.ysy.myapp.auth.util.JwtUtil;
+import com.ysy.myapp.project.util.HashUtil;
+import com.ysy.myapp.project.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

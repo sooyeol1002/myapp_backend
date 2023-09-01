@@ -1,4 +1,4 @@
-package com.ysy.myapp.auth.entity;
+package com.ysy.myapp.project.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @Entity(name = "AuthFinancialHistory")
-public class AuthFinancialHistory {
+public class FinancialHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -29,13 +29,13 @@ public class AuthFinancialHistory {
     @ManyToOne
     @JoinColumn(name = "member_id")
     @JsonIgnore
-    private AuthMember member;
+    private Member member;
 
-    public AuthMember getMember() {
+    public Member getMember() {
         return member;
     }
 
-    public void setMember(AuthMember member) {
+    public void setMember(Member member) {
         this.member = member;
     }
     @Override
