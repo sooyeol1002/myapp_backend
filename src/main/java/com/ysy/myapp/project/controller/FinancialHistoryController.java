@@ -382,6 +382,8 @@ public class FinancialHistoryController {
 
 
         System.out.println(dateStr);
+        System.out.println("Date: " + dateStr);
+        System.out.println("ID: " + id);
         if (userId == null) {
             return unauthorizedResponse("Invalid token");
         }
@@ -392,7 +394,7 @@ public class FinancialHistoryController {
             return badRequestResponse("잘못된 날짜 형식입니다.");
         }
 
-        Optional<FinancialHistory> existingHistory = repo.findByMember_DateAndId(date,id);
+        Optional<FinancialHistory> existingHistory = repo.findByDateAndId(date,id);
         if (existingHistory.isEmpty()) {
             return badRequestResponse("금융 기록을 찾을 수 없습니다.");
         }
@@ -402,7 +404,7 @@ public class FinancialHistoryController {
         currentHistory.setDeposit(updatedHistory.getDeposit());
         currentHistory.setWithdraw(updatedHistory.getWithdraw());
         currentHistory.setBalance(updatedHistory.getBalance());
-        currentHistory.setId(updatedHistory.getId());
+//        currentHistory.setId(updatedHistory.getId());
 
         FinancialHistory savedFinancialHistory = repo.save(currentHistory);
 

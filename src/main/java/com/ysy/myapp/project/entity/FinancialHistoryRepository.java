@@ -22,7 +22,7 @@ public interface FinancialHistoryRepository extends JpaRepository<FinancialHisto
 
     Optional<FinancialHistory> findByDate(LocalDate date);
 
-    Optional<FinancialHistory> findByMember_DateAndId(LocalDate date, long id);
+    Optional<FinancialHistory> findByDateAndId(LocalDate date, long id);
 
 
     @Modifying
