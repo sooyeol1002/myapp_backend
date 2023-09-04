@@ -41,8 +41,6 @@ public class FinancialHistoryController {
     private FinancialHistoryRepository repo;
     @Autowired
     private AuthService authService;
-    @Autowired
-    private DepositRequest depositRequest;
 
     // 기록추가
     @Operation(summary = "금융기록 추가", security = { @SecurityRequirement(name = "bearer-key") })
@@ -184,7 +182,7 @@ public class FinancialHistoryController {
         }
     }
 
-    @Operation(summary = "금융기록 추가, 출금")
+    @Operation(summary = "금융기록추가, 출금")
     @Auth
     @PostMapping("/withdraw")
     public ResponseEntity<Map<String, Object>> withdraw(
@@ -256,7 +254,8 @@ public class FinancialHistoryController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
         }
     }
-    // 잔액계산
+
+    @Operation(summary = "잔액계산")
     @PostMapping("calculate-balance")
     public ResponseEntity<Map<String, Long>> calculateBalance(@RequestBody Map<String, Long> data) {
         Long deposit = data.get("deposit");
@@ -274,6 +273,8 @@ public class FinancialHistoryController {
 
         return ResponseEntity.ok(res);
     }
+    @Operation(summary = "유저정보조회")
+    @Auth
     @GetMapping
     public List<FinancialHistory> view(@RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
@@ -289,11 +290,11 @@ public class FinancialHistoryController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Member data is missing");
         }
 
-        // 해당 멤버의 기록만 반환
         return repo.findAllByMemberOrderByDate(member);
     }
 
-    // 날짜값으로 데이터를 조회
+    @Operation(summary = "날짜정보로 유저 조회")
+    @Auth
     @GetMapping("/by-date/{date}")
     public ResponseEntity<List<FinancialHistory>> getFinancialHistoryByDate(@PathVariable String date, @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
@@ -314,7 +315,7 @@ public class FinancialHistoryController {
     }
 
 
-    // 월별 DB 저장값 조회
+    @Operation(summary = "월단위 유저 데이터 조회")
     @GetMapping("/by-month/{year}-{month}")
     public ResponseEntity<List<FinancialHistory>> getBalanceByMonth(@PathVariable int year, @PathVariable int month, @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
@@ -337,6 +338,7 @@ public class FinancialHistoryController {
         return ResponseEntity.ok(financialHistories);
     }
 
+    @Operation(summary = "아이디로 유저이름 조회")
     @GetMapping("/getName")
     public ResponseEntity<Map<String, Object>> getUserName(@RequestHeader("Authorization") String authorizationHeader) {
         Map<String, Object> res = new HashMap<>();
@@ -372,6 +374,7 @@ public class FinancialHistoryController {
     }
 
     // 기록 수정
+    @Operation(summary = "금융기록 수정")
     @PutMapping("/update/{id}/{dateStr}")
     public ResponseEntity<Map<String, Object>> updateFinancialHistory(@PathVariable("id") long id,
                                                                       @PathVariable String dateStr,
@@ -415,6 +418,7 @@ public class FinancialHistoryController {
     }
 
     // 날짜로 기록 삭제
+    @Operation(summary = "금융기록 삭제")
     @Transactional
     @DeleteMapping("/delete/{date}")
     public ResponseEntity<Map<String, Object>> deleteFinancialHistory(@PathVariable String date,

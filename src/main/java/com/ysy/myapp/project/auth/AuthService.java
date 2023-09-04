@@ -24,14 +24,7 @@ public class AuthService {
 
     @Autowired
     private HashUtil hash;
-    @Autowired
-    private EntityManager entityManager;
 
-    @Autowired
-    public AuthService(MemberRepository repo, FinancialHistoryRepository finanHistoryRepo) {
-        this.repo = repo;
-        this.finanHistoryRepo = finanHistoryRepo;
-    }
     @Transactional
     public Member createIdentity(SignupRequest req) {
         // 1. login 정보를 insert
@@ -87,9 +80,4 @@ public class AuthService {
         return savedFinancialHistory;
     }
 
-//    @Transactional
-//    public void signUpAndSave(SignupRequest req) {
-//        AuthMember authMember = new AuthMember(req.getName(), req.getPassword(), req.getPhone(), req.getEmail());
-//        repo.save(authMember);
-//    }
 }

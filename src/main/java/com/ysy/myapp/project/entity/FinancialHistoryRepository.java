@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 public interface FinancialHistoryRepository extends JpaRepository<FinancialHistory, Long> {
     List<FinancialHistory> findByMember_Id(Long id);
-    List<FinancialHistory> findAllByOrderByDate();
 
     List<FinancialHistory> findAllByMemberOrderByDate(Member member);
 
@@ -20,11 +19,7 @@ public interface FinancialHistoryRepository extends JpaRepository<FinancialHisto
 
     List<FinancialHistory> findByDateBetweenAndMember(LocalDate startOfMonth, LocalDate endOfMonth, Member member);
 
-    Optional<FinancialHistory> findByDate(LocalDate date);
-
     Optional<FinancialHistory> findByDateAndId(LocalDate date, long id);
-
-
     @Modifying
     @Query("delete from AuthFinancialHistory f where f.date = :date and f.member.id = :id")
     int deleteByDateAndId(LocalDate date, Long id);
