@@ -372,7 +372,7 @@ public class FinancialHistoryController {
     }
 
     // 기록 수정
-    @PutMapping("/update/{no}/{dateStr}")
+    @PutMapping("/update/{id}/{dateStr}")
     public ResponseEntity<Map<String, Object>> updateFinancialHistory(@PathVariable("id") long id,
                                                                       @PathVariable String dateStr,
                                                                       @RequestBody FinancialHistory updatedHistory,
