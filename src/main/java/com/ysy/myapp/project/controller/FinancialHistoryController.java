@@ -109,7 +109,7 @@ public class FinancialHistoryController {
         }
     }
 
-    @Operation(summary = "금융기록추가, 입금")
+    @Operation(summary = "금융기록추가, 입금", security = { @SecurityRequirement(name = "bearer-key") })
     @Auth
     @PostMapping("/deposit")
     public ResponseEntity<Map<String, Object>> deposit(
@@ -182,7 +182,7 @@ public class FinancialHistoryController {
         }
     }
 
-    @Operation(summary = "금융기록추가, 출금")
+    @Operation(summary = "금융기록추가, 출금", security = { @SecurityRequirement(name = "bearer-key") })
     @Auth
     @PostMapping("/withdraw")
     public ResponseEntity<Map<String, Object>> withdraw(
@@ -273,7 +273,7 @@ public class FinancialHistoryController {
 
         return ResponseEntity.ok(res);
     }
-    @Operation(summary = "유저정보조회")
+    @Operation(summary = "유저정보조회", security = { @SecurityRequirement(name = "bearer-key") })
     @Auth
     @GetMapping
     public List<FinancialHistory> view(@RequestHeader("Authorization") String authorizationHeader) {
@@ -293,7 +293,7 @@ public class FinancialHistoryController {
         return repo.findAllByMemberOrderByDate(member);
     }
 
-    @Operation(summary = "날짜정보로 유저 조회")
+    @Operation(summary = "날짜정보로 유저 조회", security = { @SecurityRequirement(name = "bearer-key") })
     @Auth
     @GetMapping("/by-date/{date}")
     public ResponseEntity<List<FinancialHistory>> getFinancialHistoryByDate(@PathVariable String date, @RequestHeader("Authorization") String authorizationHeader) {
@@ -315,7 +315,8 @@ public class FinancialHistoryController {
     }
 
 
-    @Operation(summary = "월단위 유저 데이터 조회")
+    @Operation(summary = "월단위 유저 데이터 조회", security = { @SecurityRequirement(name = "bearer-key") })
+    @Auth
     @GetMapping("/by-month/{year}-{month}")
     public ResponseEntity<List<FinancialHistory>> getBalanceByMonth(@PathVariable int year, @PathVariable int month, @RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");
@@ -338,7 +339,8 @@ public class FinancialHistoryController {
         return ResponseEntity.ok(financialHistories);
     }
 
-    @Operation(summary = "아이디로 유저이름 조회")
+    @Operation(summary = "아이디로 유저이름 조회", security = { @SecurityRequirement(name = "bearer-key") })
+    @Auth
     @GetMapping("/getName")
     public ResponseEntity<Map<String, Object>> getUserName(@RequestHeader("Authorization") String authorizationHeader) {
         Map<String, Object> res = new HashMap<>();
@@ -374,7 +376,8 @@ public class FinancialHistoryController {
     }
 
     // 기록 수정
-    @Operation(summary = "금융기록 수정")
+    @Operation(summary = "금융기록 수정", security = { @SecurityRequirement(name = "bearer-key") })
+    @Auth
     @PutMapping("/update/{id}/{dateStr}")
     public ResponseEntity<Map<String, Object>> updateFinancialHistory(@PathVariable("id") long id,
                                                                       @PathVariable String dateStr,
@@ -418,7 +421,8 @@ public class FinancialHistoryController {
     }
 
     // 날짜로 기록 삭제
-    @Operation(summary = "금융기록 삭제")
+    @Operation(summary = "금융기록 삭제", security = { @SecurityRequirement(name = "bearer-key") })
+    @Auth
     @Transactional
     @DeleteMapping("/delete/{date}")
     public ResponseEntity<Map<String, Object>> deleteFinancialHistory(@PathVariable String date,
